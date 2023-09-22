@@ -41,7 +41,6 @@ bot.use((ctx, next) => {
 
 // Gestisci il comando /start
 bot.command("start", (ctx) => {
-    const chatId = ctx.chat.id;
 
     ctx.reply("Benvenuto! Clicca sul pulsante 'Inizia Trivia' per iniziare il gioco.", {
         reply_markup: {
@@ -54,7 +53,6 @@ bot.command("start", (ctx) => {
 
 // Gestisci la pressione del pulsante "Inizia Trivia"
 bot.hears("Inizia Trivia", async (ctx) => {
-    const chatId = ctx.chat.id;
 
     try {
         const response = await axios.get(TRIVIA_KEY);
@@ -64,7 +62,6 @@ bot.hears("Inizia Trivia", async (ctx) => {
         const shuffledOptions = shuffleArray(options);
 
         const formattedQuestion = decodeURIComponent(question.question);
-        const formattedOptions = shuffledOptions.map((option) => decodeURIComponent(option));
 
         ctx.reply(formattedQuestion, {
             reply_markup: {
