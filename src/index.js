@@ -39,12 +39,14 @@ bot.use((ctx, next) => {
     next();
 });
 
+// Variabile di stato per tenere traccia della domanda corrente
+let currentQuestion = null;
+
 // Gestisci il comando /start
 bot.command("start", (ctx) => {
-
-    ctx.reply("Benvenuto! Clicca sul pulsante 'Inizia Trivia' per iniziare il gioco.", {
+    ctx.reply("Eccoci qui, benvenuti! Iniziamo a giocare.", {
         reply_markup: {
-            keyboard: [['Inizia Trivia']],
+            keyboard: [['Inizia la Ghigliottina']],
             resize_keyboard: true,
             one_time_keyboard: true,
         },
@@ -52,16 +54,15 @@ bot.command("start", (ctx) => {
 });
 
 // Gestisci la pressione del pulsante "Inizia Trivia"
-bot.hears("Inizia Trivia", async (ctx) => {
-
+bot.hears(["Inizia la Ghigliottina", "Prossima Domanda"], async (ctx) => {
     try {
         const response = await axios.get(TRIVIA_KEY);
-        const question = response.data.results[0];
+        currentQuestion = response.data.results[0];
 
-        const options = [...question.incorrect_answers, question.correct_answer];
+        const options = [...currentQuestion.incorrect_answers, currentQuestion.correct_answer];
         const shuffledOptions = shuffleArray(options);
 
-        const formattedQuestion = decodeURIComponent(question.question);
+        const formattedQuestion = decodeURIComponent(currentQuestion.question);
 
         ctx.reply(formattedQuestion, {
             reply_markup: {
@@ -70,30 +71,35 @@ bot.hears("Inizia Trivia", async (ctx) => {
                 one_time_keyboard: true,
             },
         });
-
-        // Attendi la risposta dell'utente
-        bot.on("text", async (answerMsg) => {
-            const userAnswer = answerMsg.text;
-            const correctAnswer = decodeURIComponent(question.correct_answer);
-
-            if (userAnswer === correctAnswer) {
-                ctx.reply(`Risposta corretta! La risposta è: ${correctAnswer}`);
-            } else {
-                ctx.reply(`Risposta sbagliata. La risposta corretta è: ${correctAnswer}`);
-            }
-
-            // Fai in modo che l'utente possa avviare una nuova domanda
-            ctx.reply("Clicca su 'Inizia Trivia' per una nuova domanda.", {
-                reply_markup: {
-                    keyboard: [['Inizia Trivia']],
-                    resize_keyboard: true,
-                    one_time_keyboard: true,
-                },
-            });
-        });
     } catch (error) {
         console.error('Errore nella richiesta API:', error.message);
         ctx.reply('Si è verificato un errore durante il recupero delle domande. Riprova più tardi.');
+    }
+});
+
+// Gestisci le risposte dell'utente
+bot.on("text", async (ctx) => {
+    if (currentQuestion) {
+        const userAnswer = ctx.message.text;
+        const correctAnswer = decodeURIComponent(currentQuestion.correct_answer);
+
+        if (userAnswer === correctAnswer) {
+            ctx.reply(`Eh si, la risposta corretta è: ${correctAnswer}`);
+        } else {
+            ctx.reply(`E invece no, purtroppo la risposta corretta è: ${correctAnswer}`);
+        }
+
+        // Pulisci la domanda corrente
+        currentQuestion = null;
+
+        // Fai in modo che l'utente possa avviare una nuova domanda
+        ctx.reply("Clicca su 'Prossima Domanda' per una nuova domanda.", {
+            reply_markup: {
+                keyboard: [['Prossima Domanda']],
+                resize_keyboard: true,
+                one_time_keyboard: true,
+            },
+        });
     }
 });
 
@@ -105,6 +111,13 @@ function shuffleArray(array) {
     }
     return array;
 }
+
+// Avvia il bot
+bot.launch().then(() => {
+    console.log('Bot trivia avviato. Premi Ctrl+C per uscire.');
+}).catch((err) => {
+    console.error('Errore nell\'avvio del bot:', err);
+});
 
 // Avvia il bot
 bot.launch().then(() => {
