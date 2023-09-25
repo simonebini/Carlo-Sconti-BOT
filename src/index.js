@@ -108,7 +108,6 @@ bot.on("text", async (ctx) => {
             if(score > 0) score -= 2;
             else score = 0;
             
-
             setTimeout(() => {
                 ctx.reply(`E invece no, purtroppo la risposta corretta è: ${correctAnswer}`, {
                     reply_markup: {
