@@ -10,6 +10,8 @@ const {
     ADMIN_CHAT_ID
 } = process.env;
 
+let score = 0;
+
 if (!BOT_TOKEN || !TRIVIA_KEY) {
     throw new Error("BOT_TOKEN must be provided!");
 }
@@ -83,23 +85,46 @@ bot.on("text", async (ctx) => {
         const userAnswer = ctx.message.text;
         const correctAnswer = decodeURIComponent(currentQuestion.correct_answer);
 
-        if (userAnswer === correctAnswer) {
-            ctx.reply(`Eh si, la risposta corretta è: ${correctAnswer}`);
-        } else {
-            ctx.reply(`E invece no, purtroppo la risposta corretta è: ${correctAnswer}`);
-        }
+        // Invia il messaggio "Ghigliottina"
+        ctx.reply("Ghigliottina");
 
         // Pulisci la domanda corrente
         currentQuestion = null;
 
-        // Fai in modo che l'utente possa avviare una nuova domanda
-        ctx.reply("Clicca su 'Prossima Domanda' per una nuova domanda.", {
-            reply_markup: {
-                keyboard: [['Prossima Domanda']],
-                resize_keyboard: true,
-                one_time_keyboard: true,
-            },
-        });
+        if (userAnswer === correctAnswer) {
+            score += 10;
+
+            setTimeout(() => {
+                ctx.reply(`Eh si, la risposta corretta è: ${correctAnswer}`, {
+                    reply_markup: {
+                        keyboard: [['Prossima Domanda']],
+                        resize_keyboard: true,
+                        one_time_keyboard: true,
+                    },
+                });
+            }, 2000);
+
+        } else {
+            if(score > 0) score -= 2;
+            else score = 0;
+            
+
+            setTimeout(() => {
+                ctx.reply(`E invece no, purtroppo la risposta corretta è: ${correctAnswer}`, {
+                    reply_markup: {
+                        keyboard: [['Prossima Domanda']],
+                        resize_keyboard: true,
+                        one_time_keyboard: true,
+                    },
+                });
+            }, 2000);
+
+        }
+
+        setTimeout(() => {
+            // Invia il punteggio attuale
+            ctx.reply(`Il tuo punteggio attuale è: ${score}`);
+        }, 2000);
     }
 });
 
@@ -111,13 +136,6 @@ function shuffleArray(array) {
     }
     return array;
 }
-
-// Avvia il bot
-bot.launch().then(() => {
-    console.log('Bot trivia avviato. Premi Ctrl+C per uscire.');
-}).catch((err) => {
-    console.error('Errore nell\'avvio del bot:', err);
-});
 
 // Avvia il bot
 bot.launch().then(() => {
