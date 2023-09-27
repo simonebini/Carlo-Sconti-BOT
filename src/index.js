@@ -126,8 +126,9 @@ bot.on("text", async (ctx) => {
                       },
                     });
             }
-
-            ctx.reply(`Il tuo punteggio attuale è: ${score}`);
+            setTimeout(() => {
+                ctx.reply(`Il tuo punteggio attuale è: ${score}`);
+            }, 4500);
         }, 4000);
     }
 });
