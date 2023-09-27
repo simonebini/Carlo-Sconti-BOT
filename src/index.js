@@ -18,29 +18,6 @@ if (!BOT_TOKEN || !TRIVIA_KEY) {
 
 const bot = new Telegraf(BOT_TOKEN);
 
-const notifyAdmin = (message) => {
-    if (ADMIN_CHAT_ID) {
-        bot.telegram.sendMessage(ADMIN_CHAT_ID, message);
-    }
-};
-
-// Middleware per verificare l'autorizzazione degli utenti
-bot.use((ctx, next) => {
-    // Controlla se ALLOWED_CHAT_IDS è definito e autorizza solo i chat_id elencati
-    if (ctx.updateType === "message" && ALLOWED_CHAT_IDS) {
-        const allowedChatIds = ALLOWED_CHAT_IDS.split(",");
-
-        if (!allowedChatIds.includes(ctx.message.chat.id.toString())) {
-            notifyAdmin(`Accesso non autorizzato da chat_id ${ctx.message.chat.id}`);
-            ctx.reply("Non sei autorizzato a utilizzare questo bot!");
-            return;
-        }
-    }
-
-    // Continua con il prossimo middleware
-    next();
-});
-
 // Variabile di stato per tenere traccia della domanda corrente
 let currentQuestion = null;
 
