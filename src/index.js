@@ -28,6 +28,22 @@ bot.command("start", (ctx) => {
     });
 });
 
+//gestore comando per terminare la partita
+bot.hears(["Termina Partita"], async (ctx) => {
+
+    score = 0;
+    currentQuestion = null;
+
+    ctx.reply("Ci rivediamo domani alla prossima puntata!", {
+        reply_markup: {
+            keyboard: [['Inizia la Ghigliottina']],
+            resize_keyboard: true,
+            one_time_keyboard: true,
+        },
+    });
+
+});
+
 //gestore comando per iniziare la partita o passare alla domanda successiva
 bot.hears(["Inizia la Ghigliottina", "Prossima Domanda"], async (ctx) => {
     try {
@@ -50,22 +66,6 @@ bot.hears(["Inizia la Ghigliottina", "Prossima Domanda"], async (ctx) => {
         console.error('Errore nella richiesta API:', error.message);
         ctx.reply('Si è verificato un errore durante il recupero delle domande. Riprova più tardi.');
     }
-});
-
-//gestore comando per terminare la partita
-bot.hears(["Termina Partita"], async (ctx) => {
-
-    score = 0;
-    currentQuestion = null;
-
-    ctx.reply("Partita terminata, se vuoi rigiocare clicca il pulsante qui sotto", {
-        reply_markup: {
-            keyboard: [['Inizia la Ghigliottina']],
-            resize_keyboard: true,
-            one_time_keyboard: true,
-        },
-    });
-
 });
 
 //gestore le risposte dell'utente
@@ -114,7 +114,6 @@ function shuffleArray(array) {
     }
     return array;
 }
-
 
 bot.launch().then(() => {
     console.log('Bot trivia avviato.');
