@@ -17,6 +17,14 @@ if (!BOT_TOKEN || !TRIVIA_KEY) {
 const bot = new Telegraf(BOT_TOKEN);
 let currentQuestion = null;
 
+function decodeHtmlEntities(encodedString) {
+    return encodedString.replace(/&quot;/g, '"')
+                       .replace(/&lt;/g, '<')
+                       .replace(/&gt;/g, '>')
+                       .replace(/&amp;/g, '&')
+                       .replace(/&#039;/g, "'"); 
+}
+
 //gestore comando per avviare il bot
 bot.command("start", (ctx) => {
 
@@ -62,7 +70,7 @@ bot.hears(["Inizia il Gioco", "Prossima Domanda"], async (ctx) => {
         const options = [...currentQuestion.incorrect_answers, currentQuestion.correct_answer];
         const shuffledOptions = shuffleArray(options);
 
-        const formattedQuestion = decodeURIComponent(currentQuestion.question);
+        const formattedQuestion = decodeHtmlEntities(currentQuestion.question);
 
         ctx.reply(formattedQuestion, {
             reply_markup: {
@@ -81,7 +89,7 @@ bot.hears(["Inizia il Gioco", "Prossima Domanda"], async (ctx) => {
 bot.on("text", async (ctx) => {
     if (currentQuestion) {
         const userAnswer = ctx.message.text;
-        const correctAnswer = decodeURIComponent(currentQuestion.correct_answer);
+        const correctAnswer = decodeHtmlEntities(currentQuestion.correct_answer);
 
         ctx.replyWithAnimation({
             source: path.join(__dirname, '../img/scossa.gif'),
